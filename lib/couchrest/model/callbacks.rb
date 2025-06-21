@@ -23,7 +23,11 @@ module CouchRest #:nodoc:
         include ActiveModel::Validations::Callbacks
 
         define_model_callbacks :initialize, :only => :after
-        define_model_callbacks :create, :destroy, :save, :update
+
+        # Rails (via ActiveModel::Validations::Callbacks) already defines
+        # :save, :create and :update.  We only need to *add* :destroy –
+        # and even that only if it isn’t there yet.
+        define_model_callbacks :destroy unless respond_to?(:_destroy_callbacks)
       end
     end
   end

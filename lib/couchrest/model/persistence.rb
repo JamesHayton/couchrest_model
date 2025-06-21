@@ -8,15 +8,11 @@ module CouchRest
       # be returned.
       def create(options = {})
         return false unless perform_validations(options)
-        run_callbacks :create do
-          run_callbacks :save do
-            set_unique_id if new? && respond_to?(:set_unique_id)
-            result = database.save_doc(self)
-            ret = (result["ok"] == true) ? self : false
-            clear_changes_information if ret
-            ret
-          end
-        end
+        set_unique_id if new? && respond_to?(:set_unique_id)
+        result = database.save_doc(self)
+        ret = (result["ok"] == true) ? self : false
+        clear_changes_information if ret
+        ret
       end
 
       # Creates the document in the db. Raises an exception
@@ -32,14 +28,10 @@ module CouchRest
         raise "Calling #{self.class.name}#update on document that has not been created!" if new?
         return false unless perform_validations(options)
         return true unless changed?
-        run_callbacks :update do
-          run_callbacks :save do
-            result = database.save_doc(self)
-            ret = result["ok"] == true
-            clear_changes_information if ret
-            ret
-          end
-        end
+        result = database.save_doc(self)
+        ret = result["ok"] == true
+        clear_changes_information if ret
+        ret
       end
 
       # Trigger the callbacks (before, after, around) and save the document
@@ -56,14 +48,12 @@ module CouchRest
 
       # Deletes the document from the database. Runs the :destroy callbacks.
       def destroy
-        run_callbacks :destroy do
-          result = database.delete_doc(self)
-          if result['ok']
-            @_destroyed = true
-            self.freeze
-          end
-          result['ok']
+        result = database.delete_doc(self)
+        if result['ok']
+          @_destroyed = true
+          self.freeze
         end
+        result['ok']
       end
 
       def destroyed?

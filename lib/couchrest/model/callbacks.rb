@@ -26,12 +26,32 @@ module CouchRest #:nodoc:
       # Declare the callback events (unchanged from upstream code)
       # ---------------------------------------------------------------
       included do
-        extend  ActiveModel::Callbacks
-        include ActiveModel::Validations::Callbacks
+               extend  ActiveModel::Callbacks
+               include ActiveModel::Validations::Callbacks
 
-        define_model_callbacks :initialize, :only => :after
-        define_model_callbacks :create, :destroy, :save, :update
-      end
+               define_model_callbacks :initialize, :only => :after
+               define_model_callbacks :create, :destroy, :save, :update
+      
+              # ------------------------------------------------------------
+              # Rails wraps the target method (e.g. :save) the first time
+              # you call `set_callback`.  A *second* callback on the same
+              # event tries to wrap it again, creating an alias loop with
+              # CouchRest’s own method visibility.  Guard against that:
+              # ------------------------------------------------------------
+      
+              singleton_class.class_eval do
+                # keep original helper
+                alias_method :_cr_orig_update_hook, :_update_hook
+      
+                # run it *once* per event; later calls just append the filter
+                def _update_hook(event)
+                  @_cr_wrapper_once ||= {}
+                  return if @_cr_wrapper_once[event]
+                  @_cr_wrapper_once[event] = true
+                  _cr_orig_update_hook(event)
+                end
+              end
+             end
 
       # ---------------------------------------------------------------
       # NEW: Guard Active Support’s internal `_update_hook` so the

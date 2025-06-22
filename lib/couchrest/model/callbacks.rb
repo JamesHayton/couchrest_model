@@ -2,9 +2,6 @@
 
 module CouchRest #:nodoc:
   module Model #:nodoc:
-    #
-    # Active-Model style callbacks for CouchRest::Model.
-    #
     module Callbacks
       extend ActiveSupport::Concern
 
@@ -21,29 +18,23 @@ module CouchRest #:nodoc:
         extend  ActiveModel::Callbacks
         include ActiveModel::Validations::Callbacks
 
-        # CouchRest-specific event
+        # Event unique to CouchRest
         define_model_callbacks :initialize, :only => :after
 
-        # Rails already defines :save, :create, :update via
-        # ActiveModel::Validations::Callbacks.  Declaring them again
-        # would add a second wrapper and recurse forever.
-        #
-        # We add :destroy only if it isn’t present.
-        define_model_callbacks :destroy unless respond_to? :_destroy_callbacks
+        # Define the four CRUD events.  SkipDoubleWrap (see below)
+        # ensures each one is wrapped at most once.
+        define_model_callbacks :save, :create, :update, :destroy
       end
     end
   end
 end
 
-# ------------------------------------------------------------------
-# After CouchRest::Model::Base is loaded, prepend the guard that keeps
-# each event wrapped exactly once.
-# ------------------------------------------------------------------
 require_relative "skip_double_wrap"
 
 ActiveSupport.on_load(:couchrest_model_base) do
   singleton_class.prepend CouchRest::Model::SkipDoubleWrap
 end
+
 
 
 

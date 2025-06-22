@@ -35,6 +35,7 @@ module CouchRest #:nodoc:
         define_model_callbacks :update unless respond_to? :_update_callbacks
         define_model_callbacks :destroy unless respond_to? :_destroy_callbacks
       end
+    end
   end
 end
 

@@ -22,14 +22,19 @@ module CouchRest #:nodoc:
         extend  ActiveModel::Callbacks
         include ActiveModel::Validations::Callbacks
 
+        # :initialize is unique to CouchRest
         define_model_callbacks :initialize, :only => :after
 
-        # Rails (via ActiveModel::Validations::Callbacks) already defines
-        # :save, :create and :update.  We only need to *add* :destroy –
-        # and even that only if it isn’t there yet.
-        define_model_callbacks :destroy unless respond_to?(:_destroy_callbacks)
+        # ------------------------------------------------------------
+        # Define the CRUD events exactly once.
+        # If another module has already defined *_callbacks we skip it,
+        # preventing the second wrapper that caused the recursion.
+        # ------------------------------------------------------------
+        define_model_callbacks :save   unless respond_to? :_save_callbacks
+        define_model_callbacks :create unless respond_to? :_create_callbacks
+        define_model_callbacks :update unless respond_to? :_update_callbacks
+        define_model_callbacks :destroy unless respond_to? :_destroy_callbacks
       end
-    end
   end
 end
 

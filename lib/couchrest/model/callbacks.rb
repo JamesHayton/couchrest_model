@@ -4,7 +4,8 @@ module CouchRest #:nodoc:
   module Model #:nodoc:
     #
     # Active-Model style callbacks for CouchRest::Model.
-    # (Legacy alias-method wrappers were removed for Rails 5+.)
+    # Legacy alias-method-chain wrappers have been removed; Rails’
+    # modern prepend wrapper handles all events.
     #
     module Callbacks
       extend ActiveSupport::Concern
@@ -22,22 +23,29 @@ module CouchRest #:nodoc:
         extend  ActiveModel::Callbacks
         include ActiveModel::Validations::Callbacks
 
-        # :initialize is unique to CouchRest
+        # Event unique to CouchRest
         define_model_callbacks :initialize, :only => :after
 
-        # ------------------------------------------------------------
-        # Define the CRUD events exactly once.
-        # If another module has already defined *_callbacks we skip it,
-        # preventing the second wrapper that caused the recursion.
-        # ------------------------------------------------------------
-        define_model_callbacks :save   unless respond_to? :_save_callbacks
-        define_model_callbacks :create unless respond_to? :_create_callbacks
-        define_model_callbacks :update unless respond_to? :_update_callbacks
+        # Rails (via ActiveModel::Validations::Callbacks) already
+        # defines :save, :create and :update — redefining them would
+        # add a second wrapper and cause infinite recursion.
+        #
+        # We define :destroy **only if** it is still missing.
         define_model_callbacks :destroy unless respond_to? :_destroy_callbacks
       end
     end
   end
 end
+
+# --------------------------------------------------------------------
+# Prevent a second wrapper from being generated for the *same* event.
+# --------------------------------------------------------------------
+require_relative "skip_double_wrap"   # see file below
+
+CouchRest::Model::Base.singleton_class.prepend(
+  CouchRest::Model::SkipDoubleWrap
+)
+
 
 
 

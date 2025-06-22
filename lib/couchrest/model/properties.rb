@@ -184,9 +184,10 @@ module CouchRest
           property(:updated_at, Time, :read_only => true, :protected => true, :auto_validation => false)
           property(:created_at, Time, :read_only => true, :protected => true, :auto_validation => false)
 
-          set_callback :save, :before do |object|
-            write_attribute('updated_at', Time.now)
-            write_attribute('created_at', Time.now) if object.new?
+          # Use our new callback system that doesn't trigger the Rails 7+ bug
+          before_save do |object|
+            object.write_attribute('updated_at', Time.now)
+            object.write_attribute('created_at', Time.now) if object.new?
           end
         end
 

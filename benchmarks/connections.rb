@@ -22,7 +22,7 @@ class SampleModel < CouchRest::Model::Base
   property :name, String
   property :date, Date
 
-  timestamps!
+  #timestamps!
 
   design do
     view :by_name

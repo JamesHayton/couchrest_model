@@ -30,7 +30,7 @@ module CouchRest::Model
     def initialize(attributes = {}, options = {})
       super()
       write_attributes_for_initialization(attributes, options)
-      run_callbacks(:initialize) { self }
+      #run_callbacks(:initialize) { self }
     end
 
     # False if the casted model has already

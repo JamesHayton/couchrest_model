@@ -1,7 +1,7 @@
 module CouchRest
   module Model
     class Base < CouchRest::Document
-      ActiveSupport.run_load_hooks(:couchrest_model_base, self)
+      # ActiveSupport.run_load_hooks(:couchrest_model_base, self)
       include ActiveModel::Conversion
 
       extend Translation
@@ -28,15 +28,6 @@ module CouchRest
       def self.inherited(subklass)
         super
         subklass.send(:include, Properties)
-
-        subklass.class_eval <<-EOS, __FILE__, __LINE__ + 1
-          def self.inherited(subklass)
-            super
-            subklass.properties = self.properties.dup
-            # This is nasty:
-            subklass._validators = self._validators.dup
-          end
-        EOS
         subclasses << subklass
       end
 

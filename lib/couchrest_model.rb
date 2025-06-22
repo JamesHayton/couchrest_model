@@ -12,7 +12,7 @@ require "active_model/dirty"
 require "active_support/core_ext"
 require "active_support/json"
 
-require "mime/types"
+# require "mime/types" # Temporarily disabled for Ruby 3.2 compatibility
 require "enumerator"
 require "time"
 require "digest/md5"

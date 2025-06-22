@@ -62,8 +62,21 @@ module CouchRest
       
         def get_mime_type(path)
           return nil if path.nil?
-          type = ::MIME::Types.type_for(path)
-          type.empty? ? nil : type.first.content_type
+          # Simple mime type detection for Ruby 3.2 compatibility
+          # Replace with proper mime-types gem when updated for Ruby 3.2
+          case File.extname(path).downcase
+          when '.pdf' then 'application/pdf'
+          when '.jpg', '.jpeg' then 'image/jpeg'
+          when '.png' then 'image/png'
+          when '.gif' then 'image/gif'
+          when '.txt' then 'text/plain'
+          when '.html', '.htm' then 'text/html'
+          when '.json' then 'application/json'
+          when '.xml' then 'application/xml'
+          when '.csv' then 'text/csv'
+          when '.zip' then 'application/zip'
+          else 'application/octet-stream'
+          end
         end
 
         def set_attachment_attr(args)

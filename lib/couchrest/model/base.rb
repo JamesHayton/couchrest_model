@@ -1,7 +1,7 @@
 module CouchRest
   module Model
     class Base < CouchRest::Document
-
+      ActiveSupport.run_load_hooks(:couchrest_model_base, self)
       include ActiveModel::Conversion
 
       extend Translation
